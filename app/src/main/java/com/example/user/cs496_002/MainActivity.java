@@ -53,14 +53,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        Button btn  = (Button) findViewById(R.id.button);
-        btn.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v){
-                Intent intent = new Intent(MainActivity.this, TabActivity.class);
-                startActivity(intent);
-            }
-        });
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data){

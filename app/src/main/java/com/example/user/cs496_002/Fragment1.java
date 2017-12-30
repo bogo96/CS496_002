@@ -81,6 +81,8 @@ public class Fragment1 extends Fragment {
         // AsyncTask를 통해 HttpURLConnection 수행.
         NetworkTask networkTask = new NetworkTask(url, null);
         networkTask.execute();
+
+
         return view;
     }
 
@@ -114,7 +116,12 @@ public class Fragment1 extends Fragment {
                 OutputStream outStream = con.getOutputStream();
                 //버퍼를 생성하고 넣음
                 BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outStream));
-                writer.write(jsonarray.toString());
+                try{
+                    writer.write(jsonarray.toString());
+                }catch(Exception e){
+
+                }
+
                 writer.flush();
                 writer.close();//버퍼를 받아줌
 
