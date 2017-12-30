@@ -70,7 +70,8 @@ public class MyApplication extends Application {
             Contact c = new Contact(
                     name,
                     number,
-                    email
+                    "",
+                    ""
             );
 
             Log.i("CONTACT", c.name);

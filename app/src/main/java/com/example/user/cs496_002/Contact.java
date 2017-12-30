@@ -6,7 +6,7 @@ package com.example.user.cs496_002;
 
 public class Contact {
     String name, number, email, link;
-    Contact(String name, String number, String email){
+    Contact(String name, String number, String email, String link){
         this.name = name;
         this.number = number;
         this.email = email;

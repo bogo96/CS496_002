@@ -39,7 +39,6 @@ public class MainActivity extends AppCompatActivity {
             public void onSuccess(LoginResult loginResult) {
                 Intent intent = new Intent(MainActivity.this, TabActivity.class);
                 startActivity(intent);
-
             }
 
             @Override
@@ -60,6 +59,4 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode,resultCode,data);
 
     }
-
-
 }
