@@ -19,7 +19,7 @@ public class TabActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_tab);
+        setContentView(R.layout.activity_main);
 
         // Initializing the TabLayout
         tabLayout = findViewById(R.id.tabLayout);
