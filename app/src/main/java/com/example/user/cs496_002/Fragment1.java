@@ -57,18 +57,20 @@ public class Fragment1 extends Fragment {
                 intent.putExtra("name", item.getName());
                 intent.putExtra("number", item.getNumber());
                 intent.putExtra("email", item.getEmail());
+                intent.putExtra("link", item.getLink());
                 startActivity(intent);
             }
         });
 
         for(int i=0; i<ContactList.size(); i++){
             Contact c = ContactList.get(i);
-            adapter.addItem(c.name, c.number, c.email);
+            adapter.addItem(c.name, c.number, c.email, c.link);
             try{
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.accumulate("name", c.name);
                 jsonObject.accumulate("number", c.number);
                 jsonObject.accumulate("email", c.email);
+                jsonObject.accumulate("link", c.link);
                 jsonarray.put(jsonObject);
             }catch(Exception e){
 
