@@ -12,7 +12,6 @@ import android.util.Log;
 import java.util.ArrayList;
 
 public class MyApplication extends Application {
-
     public ArrayList<Contact> ContactList;
 
     @Override
