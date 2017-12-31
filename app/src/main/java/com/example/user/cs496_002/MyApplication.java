@@ -74,9 +74,9 @@ public class MyApplication extends Application {
                     ""
             );
 
-            Log.i("CONTACT", c.name);
-            Log.i("CONTACT", c.number);
-            Log.i("CONTACT", c.email);
+//            Log.i("CONTACT", c.name);
+//            Log.i("CONTACT", c.number);
+//            Log.i("CONTACT", c.email);
 
             contacts.add(c);
         }

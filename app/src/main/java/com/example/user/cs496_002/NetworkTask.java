@@ -54,6 +54,7 @@ public class NetworkTask extends AsyncTask<Void, Void, String> {
         }
         Log.i("method",method);
         Log.i("url", this.url);
+
         switch (method) {
             case "post":
                 Log.i("ss", "ss");
@@ -77,8 +78,10 @@ public class NetworkTask extends AsyncTask<Void, Void, String> {
                     //return "";
                 } catch (ProtocolException e) {
                     e.printStackTrace();
+                    Log.i("error","first");
                 } catch (IOException e) {
                     e.printStackTrace();
+                    Log.i("error","second");
                 }
                 break;
             case "get":
@@ -91,6 +94,7 @@ public class NetworkTask extends AsyncTask<Void, Void, String> {
             default:
                 break;
         }
+
         StringBuffer buffer = null;
         InputStream stream = null;
         try {
@@ -105,6 +109,8 @@ public class NetworkTask extends AsyncTask<Void, Void, String> {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+
         return buffer.toString();
     }
 

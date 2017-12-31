@@ -14,6 +14,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,12 +22,13 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.GridView;
 import android.widget.Toast;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONStringer;
 
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
 
 public class Fragment2 extends Fragment {
@@ -36,12 +38,14 @@ public class Fragment2 extends Fragment {
     private GridViewAdapter gridViewAdapter;
     private GridView grid;
     private JSONArray jsonList;
+    private JSONObject temp;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
 
         imageList = new ArrayList<>();
+        jsonList  = new JSONArray();
         View resultView = inflater.inflate(R.layout.tab_fragment2, container, false);
 
         grid = (GridView) resultView.findViewById(R.id.gridView);
@@ -97,16 +101,30 @@ public class Fragment2 extends Fragment {
 
                     for(int i=0;i < clipData.getItemCount(); i++){
                         uri = clipData.getItemAt(i).getUri();
+                        Log.i("uri",uri.toString());
+
                         imageList.add(uri);
-                        JSONObject temp = new JSONObject();
+                        temp = new JSONObject();
                         try {
                             temp.accumulate("uri",uri);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
                         jsonList.put(temp);
+
                     }
                     gridViewAdapter.notifyDataSetChanged();
+
+                    NetworkTask post2network = new NetworkTask("api/images","post", null, jsonList);
+                    post2network.execute();
+
+                    try {
+                        String result = post2network.get();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    } catch (ExecutionException e) {
+                        e.printStackTrace();
+                    }
 
                     grid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                         @Override
