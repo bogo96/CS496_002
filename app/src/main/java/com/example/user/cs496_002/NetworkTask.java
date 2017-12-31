@@ -2,6 +2,8 @@ package com.example.user.cs496_002;
 
 import android.content.ContentValues;
 import android.os.AsyncTask;
+import android.util.Log;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 
@@ -17,12 +19,14 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 
+import static com.facebook.FacebookSdk.getApplicationContext;
+
 /**
  * Created by user on 2017-12-31.
  */
 public class NetworkTask extends AsyncTask<Void, Void, String> {
 
-    private String url = "http://143.248.36.231:3000/",routes,method;
+    private String url = "http://13.125.89.131:8080/",routes,method;
     private ContentValues values;
     private JSONArray jsonarray;
 
@@ -37,7 +41,7 @@ public class NetworkTask extends AsyncTask<Void, Void, String> {
 
     @Override
     protected String doInBackground(Void... params) {
-        url = url + routes + "/" + method;
+        url = url + routes;
         URL url = null;//url을 가져온다.
         HttpURLConnection con = null;
         try {
@@ -48,9 +52,11 @@ public class NetworkTask extends AsyncTask<Void, Void, String> {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        Log.i("method",method);
+        Log.i("url", this.url);
         switch (method) {
             case "post":
+                Log.i("ss", "ss");
                 try {
                     con.setRequestMethod("POST");//POST방식으로 보냄
                     con.setRequestProperty("Cache-Control", "no-cache");//캐시 설정
@@ -74,35 +80,38 @@ public class NetworkTask extends AsyncTask<Void, Void, String> {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+                break;
             case "get":
                 try {
                     con.connect();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+                break;
             default:
-                StringBuffer buffer;
-                InputStream stream = null;
-                try {
-                    stream = con.getInputStream();
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-                    buffer = new StringBuffer();
-                    String line = "";
-                    while ((line = reader.readLine()) != null) {
-                        buffer.append(line);
-                    }
-                    return buffer.toString();//서버로 부터 받은 값을 리턴해줌 아마 OK!!가 들어올것임
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-
+                break;
         }
-        return url.toString();
+        StringBuffer buffer = null;
+        InputStream stream = null;
+        try {
+            stream = con.getInputStream();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+            buffer = new StringBuffer();
+            String line = "";
+            while ((line = reader.readLine()) != null) {
+                buffer.append(line);
+            }
+            return buffer.toString();//서버로 부터 받은 값을 리턴해줌 아마 OK!!가 들어올것임
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return buffer.toString();
     }
 
     protected void onPostExecute(String s) {
         super.onPostExecute(s);
+
+        Toast.makeText(getApplicationContext(), s , Toast.LENGTH_LONG).show();
 
         //doInBackground()로 부터 리턴된 값이 onPostExecute()의 매개변수로 넘어오므로 s를 출력한다.
     }

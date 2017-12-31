@@ -10,10 +10,8 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import java.util.ArrayList;
-
-import static com.facebook.FacebookSdk.getApplicationContext;
+import java.util.concurrent.ExecutionException;
 
 public class Fragment1 extends Fragment {
     String str;
@@ -62,10 +60,20 @@ public class Fragment1 extends Fragment {
             }
         }
         // AsyncTask를 통해 HttpURLConnection 수행.
-        NetworkTask networkTask = new NetworkTask("api/contact","post", null, jsonarray);
+        NetworkTask networkTask = new NetworkTask("api/contacts","post", null, jsonarray);
         networkTask.execute();
+
+        try {
+            String result = networkTask.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+
+        NetworkTask getAllContact = new NetworkTask("api/getallcontacts", "get",null, null);
+        getAllContact.execute();
 
         return view;
     }
 }
-
