@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
@@ -61,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
 
                 @Override
                 public void onSuccess(LoginResult loginResult) {
-
+                    token = AccessToken.getCurrentAccessToken();
                     Intent intent = new Intent(MainActivity.this, TabActivity.class);
                     startActivity(intent);
                     goTab.setVisibility(View.VISIBLE);
@@ -81,8 +82,10 @@ public class MainActivity extends AppCompatActivity {
         goTab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, TabActivity.class);
-                startActivity(intent);
+                if(AccessToken.getCurrentAccessToken()!=null) {
+                    Intent intent = new Intent(MainActivity.this, TabActivity.class);
+                    startActivity(intent);
+                }
             }
         });
     }

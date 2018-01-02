@@ -1,14 +1,19 @@
 package com.example.user.cs496_002;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 
 public class ListViewAdapter extends BaseAdapter {
@@ -39,11 +44,41 @@ public class ListViewAdapter extends BaseAdapter {
             convertView = inflater.inflate(R.layout.listview_item, parent, false);
         }
 
+        final View view = convertView;
+
         // 화면에 표시될 View(Layout이 inflate된)으로부터 위젯에 대한 참조 획득
         TextView nameTextView = convertView.findViewById(R.id.textView1);
 
         // Data Set(listViewItemList)에서 position에 위치한 데이터 참조 획득
-        ListViewItem listViewItem = listViewItemList.get(position);
+        final ListViewItem listViewItem = listViewItemList.get(position);
+
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {    // 오래 거릴 작업을 구현한다
+                // TODO Auto-generated method stub
+                try{
+                    // 걍 외우는게 좋다 -_-;
+                    final ImageView iv = (ImageView)view.findViewById(R.id.imageView);
+                    URL url = new URL(listViewItem.getLink());
+                    InputStream is = url.openStream();
+                    final Bitmap bm = BitmapFactory.decodeStream(is);
+                    handler.post(new Runnable() {
+
+                        @Override
+                        public void run() {  // 화면에 그려줄 작업
+                            iv.setImageBitmap(bm);
+                        }
+                    });
+                    iv.setImageBitmap(bm); //비트맵 객체로 보여주기
+                } catch(Exception e){
+
+                }
+
+            }
+        });
+
+        t.start();
+
 
 
         // 아이템 내 각 위젯에 데이터 반영
