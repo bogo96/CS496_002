@@ -32,6 +32,7 @@ import java.util.concurrent.ExecutionException;
 
 public class MyApplication extends Application {
     public ArrayList<Contact> ContactList;
+    public ArrayList<Origin> imageList;
     public AccessToken token;
     public String id;
     public boolean fetchfinish;
@@ -40,6 +41,8 @@ public class MyApplication extends Application {
     public void onCreate(){
         super.onCreate();
         ContactList = new ArrayList<Contact>();
+        imageList = new ArrayList<Origin>();
+
         token = AccessToken.getCurrentAccessToken();
         id="";
         fetchfinish = false;
