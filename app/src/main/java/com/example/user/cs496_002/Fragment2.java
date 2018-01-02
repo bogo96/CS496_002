@@ -108,7 +108,7 @@ public class Fragment2 extends Fragment {
 
         grid = (GridView) resultView.findViewById(R.id.gridView);
         Log.i("OOM",Integer.toString(myApp.imageList.size()));
-        gridViewAdapter = new GridViewAdapter(getActivity(), R.layout.grid_item, myApp.imageList);
+        gridViewAdapter = new GridViewAdapter(getActivity(), R.layout.grid_item, myApp.imageList,myApp.id);
         grid.setAdapter(gridViewAdapter);
         Log.i("grid","start get");
         getImageThread getImage = new getImageThread();
@@ -176,37 +176,38 @@ public class Fragment2 extends Fragment {
 
                     for(int i=0;i < clipData.getItemCount(); i++){
                         uri = clipData.getItemAt(i).getUri();
-                        Bitmap bitmap = null;
-                        try {
-                            bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), uri);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-
-                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                        bitmap.compress(Bitmap.CompressFormat.PNG,100,baos);
-                        byte[] b = baos.toByteArray();
-                        String encodeImg = Base64.encodeToString(b,Base64.DEFAULT);
-                        JSONArray jsonList = new JSONArray();
-                        try {
-                            JSONObject temp = new JSONObject();
-                            temp.accumulate("img", encodeImg);
-                            Log.i("postDB","before post");
-                            jsonList.put(temp);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-
-                        NetworkTask post2db = new NetworkTask("api/images","post", null, jsonList);
-                        post2db.execute();
-
-                        try {
-                            String result = post2db.get();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        } catch (ExecutionException e) {
-                            e.printStackTrace();
-                        }
+//                        Bitmap bitmap = null;
+//                        try {
+//                            bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), uri);
+//                        } catch (IOException e) {
+//                            e.printStackTrace();
+//                        }
+//
+//                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//                        bitmap.compress(Bitmap.CompressFormat.PNG,100,baos);
+//                        byte[] b = baos.toByteArray();
+//                        String encodeImg = Base64.encodeToString(b,Base64.DEFAULT);
+//                        JSONArray jsonList = new JSONArray();
+//                        try {
+//                            JSONObject temp = new JSONObject();
+//                            temp.accumulate("img", encodeImg);
+////                            temp.accumulate("id",myApp.id);
+//                            Log.i("postDB","before post");
+//                            jsonList.put(temp);
+//                        } catch (JSONException e) {
+//                            e.printStackTrace();
+//                        }
+//
+//                        NetworkTask postDBimg = new NetworkTask("api/images","post", null, jsonList);
+//                        postDBimg.execute();
+//
+//                        try {
+//                            String result = postDBimg.get();
+//                        } catch (InterruptedException e) {
+//                            e.printStackTrace();
+//                        } catch (ExecutionException e) {
+//                            e.printStackTrace();
+//                        }
 
                         Log.i("uri",uri.toString());
                         myApp.imageList.add(new Origin(0,uri.toString()));
@@ -223,9 +224,19 @@ public class Fragment2 extends Fragment {
                                     new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialogInterface, int j) {
+                                            JSONArray user = new JSONArray();
+                                            JSONObject info = new JSONObject();
+                                            try {
+                                                info.accumulate("id",myApp.id);
+                                                info.accumulate("img",myApp.imageList.get(i));
+                                            } catch (JSONException e) {
+                                                e.printStackTrace();
+                                            }
+                                            user.put(info);
+                                            NetworkTask deleteDBimg = new NetworkTask("api/images","delete", null, user);
+                                            deleteDBimg.execute();
                                             myApp.imageList.remove(i);
                                             gridViewAdapter.notifyDataSetChanged();
-
                                         };
                                     }).setNegativeButton("취소", new DialogInterface.OnClickListener() {
                                 @Override
@@ -260,11 +271,10 @@ public class Fragment2 extends Fragment {
         public void run(){
             while(next) {
                 try {
-                    NetworkTask getDBimg = new NetworkTask("api/images", "get",null, null);
+                    NetworkTask getDBimg = new NetworkTask("api/images"+myApp.id, "get",null, null);
                     getDBimg.execute();
                     String result = getDBimg.get();
                     temp = new JSONObject(result);
-
                     Log.i("OOM","bye");
                     if(temp.getString("img").compareTo("end") == 0){
                         next=false;
