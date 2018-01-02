@@ -55,7 +55,7 @@ public class GridViewAdapter extends ArrayAdapter {
 
         ViewHolder holder = new ViewHolder(imageView);
         holder.position = position;
-
+        Log.i("???", "???");
         new ThumbnailTask(position, holder, context.getContentResolver(), data,id).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
 
         return convertView;
@@ -100,39 +100,40 @@ public class GridViewAdapter extends ArrayAdapter {
                 options.inSampleSize = 4;
                 Bitmap resized = Bitmap.createScaledBitmap(bitmap, 100, 100, true);
 
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.JPEG,100,baos);
-                byte[] b = baos.toByteArray();
-                String encodeImg = Base64.encodeToString(b,Base64.DEFAULT);
-                JSONArray jsonList = new JSONArray();
-                try {
-                    JSONObject temp = new JSONObject();
-                    temp.accumulate("img", encodeImg);
-                    temp.accumulate("id",id);
-                    Log.i("postDB",Integer.toString(encodeImg.length()));
-                    jsonList.put(temp);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-                NetworkTask postDBimg = new NetworkTask("api/images","post", null, jsonList);
-                postDBimg.execute();
-
-                String result = "";
-                JSONObject imgid_json = null;
-                int imgid = -1;
-                try {
-                    result = postDBimg.get();
-                    imgid_json = new JSONObject(result);
-                    imgid = imgid_json.getInt("img");
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                data.get(mPosition).imgid = imgid;
+//                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//                bitmap.compress(Bitmap.CompressFormat.JPEG,100,baos);
+//                byte[] b = baos.toByteArray();
+//                String encodeImg = Base64.encodeToString(b,Base64.DEFAULT);
+//                JSONArray jsonList = new JSONArray();
+//                try {
+//                    JSONObject temp = new JSONObject();
+//                    temp.accumulate("img", encodeImg);
+//                    temp.accumulate("id",id);
+//                    Log.i("postDB",Integer.toString(encodeImg.length()));
+//                    Log.i("position",Integer.toString(mPosition));
+//                    jsonList.put(temp);
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                }
+//
+//                NetworkTask postDBimg = new NetworkTask("api/images","post", null, jsonList);
+//                postDBimg.execute();
+//
+//                String result = "";
+//                JSONObject imgid_json = null;
+//                int imgid = -1;
+//                try {
+//                    result = postDBimg.get();
+//                    imgid_json = new JSONObject(result);
+//                    imgid = imgid_json.getInt("img");
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                } catch (ExecutionException e) {
+//                    e.printStackTrace();
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                }
+//                data.get(mPosition).imgid = imgid;
 //                Log.i("postDB","after post");
                 return resized;
             }

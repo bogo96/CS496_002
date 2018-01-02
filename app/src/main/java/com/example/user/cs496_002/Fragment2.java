@@ -59,7 +59,7 @@ public class Fragment2 extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
 
         View resultView = inflater.inflate(R.layout.tab_fragment2, container, false);
-        MyApplication myApp = (MyApplication) getActivity().getApplication();
+        final MyApplication myApp = (MyApplication) getActivity().getApplication();
 
 
 //        NetworkTask getDBimg = new NetworkTask("api/images", "get",null, null);
@@ -142,6 +142,42 @@ public class Fragment2 extends Fragment {
 
         });
 
+        grid.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, final int i, long l) {
+
+                AlertDialog.Builder del_btn = new AlertDialog.Builder(getActivity());
+                del_btn.setMessage("이미지를 삭제하시겠습니까?").setCancelable(false).setPositiveButton("확인",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int j) {
+                                JSONArray user = new JSONArray();
+                                JSONObject info = new JSONObject();
+                                try {
+                                    info.accumulate("id", myApp.id);
+                                    info.accumulate("img", myApp.imageList.get(i).content);
+                                    info.accumulate("imgid", myApp.imageList.get(i).imgid);
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                                user.put(info);
+                                NetworkTask deleteDBimg = new NetworkTask("api/images", "delete", null, user);
+                                deleteDBimg.execute();
+                                myApp.imageList.remove(i);
+                                gridViewAdapter.notifyDataSetChanged();
+                            }
+
+                            ;
+                        }).setNegativeButton("취소", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int j) {
+                    }
+                });
+                del_btn.show();
+                return true;
+            }
+        });
+
         return resultView;
     }
 
@@ -176,77 +212,59 @@ public class Fragment2 extends Fragment {
 
                     for(int i=0;i < clipData.getItemCount(); i++){
                         uri = clipData.getItemAt(i).getUri();
-//                        Bitmap bitmap = null;
-//                        try {
-//                            bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), uri);
-//                        } catch (IOException e) {
-//                            e.printStackTrace();
-//                        }
-//
-//                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//                        bitmap.compress(Bitmap.CompressFormat.PNG,100,baos);
-//                        byte[] b = baos.toByteArray();
-//                        String encodeImg = Base64.encodeToString(b,Base64.DEFAULT);
-//                        JSONArray jsonList = new JSONArray();
-//                        try {
-//                            JSONObject temp = new JSONObject();
-//                            temp.accumulate("img", encodeImg);
-////                            temp.accumulate("id",myApp.id);
-//                            Log.i("postDB","before post");
-//                            jsonList.put(temp);
-//                        } catch (JSONException e) {
-//                            e.printStackTrace();
-//                        }
-//
-//                        NetworkTask postDBimg = new NetworkTask("api/images","post", null, jsonList);
-//                        postDBimg.execute();
-//
-//                        try {
-//                            String result = postDBimg.get();
-//                        } catch (InterruptedException e) {
-//                            e.printStackTrace();
-//                        } catch (ExecutionException e) {
-//                            e.printStackTrace();
-//                        }
+                        Bitmap bitmap = null;
+                        try {
+                            bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), uri);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                        bitmap.compress(Bitmap.CompressFormat.PNG,100,baos);
+                        byte[] b = baos.toByteArray();
+                        String encodeImg = Base64.encodeToString(b,Base64.DEFAULT);
+                        JSONArray jsonList = new JSONArray();
+                        try {
+                            JSONObject temp = new JSONObject();
+                            temp.accumulate("img", encodeImg);
+                            temp.accumulate("id",myApp.id);
+                            Log.i("postDB",Integer.toString(encodeImg.length()));
+//                    Log.i("position",Integer.toString(mPosition));
+                            Log.i("postDB","before post");
+                            jsonList.put(temp);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                        NetworkTask postDBimg = new NetworkTask("api/images","post", null, jsonList);
+                        postDBimg.execute();
+
+                        String result = "";
+                    JSONObject imgid_json = null;
+                    int imgid = -1;
+                    try {
+                        result = postDBimg.get();
+                        imgid_json = new JSONObject(result);
+                        imgid = imgid_json.getInt("result");
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    } catch (ExecutionException e) {
+                        e.printStackTrace();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+
 
                         Log.i("uri",uri.toString());
-                        myApp.imageList.add(new Origin(0,uri.toString(), -1));
+                        myApp.imageList.add(new Origin(0,uri.toString(), imgid));
                     }
                     gridViewAdapter.notifyDataSetChanged();
 
 
 
-                    grid.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener(){
-                        @Override
-                        public boolean onItemLongClick(AdapterView<?> adapterView, View view, final int i, long l) {
-                            AlertDialog.Builder del_btn = new AlertDialog.Builder(getActivity());
-                            del_btn.setMessage("이미지를 삭제하시겠습니까?").setCancelable(false).setPositiveButton("확인",
-                                    new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialogInterface, int j) {
-                                            JSONArray user = new JSONArray();
-                                            JSONObject info = new JSONObject();
-                                            try {
-                                                info.accumulate("id",myApp.id);
-                                                info.accumulate("img",myApp.imageList.get(i));
-                                            } catch (JSONException e) {
-                                                e.printStackTrace();
-                                            }
-                                            user.put(info);
-                                            NetworkTask deleteDBimg = new NetworkTask("api/images","delete", null, user);
-                                            deleteDBimg.execute();
-                                            myApp.imageList.remove(i);
-                                            gridViewAdapter.notifyDataSetChanged();
-                                        };
-                                    }).setNegativeButton("취소", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int j) {
-                                }
-                            });
-                            del_btn.show();
-                            return true;
-                        }
-                    });
+
+
 
                 }else if (clipData == null){
                     Toast.makeText(getActivity(),"하나 이상의 사진을 선택하세요.",Toast.LENGTH_SHORT).show();
@@ -276,12 +294,13 @@ public class Fragment2 extends Fragment {
                     String result = getDBimg.get();
                     temp = new JSONObject(result);
                     Log.i("OOM","bye");
+                    Log.i("temp", temp.toString());
                     if(temp.getString("img").compareTo("end") == 0){
                         next=false;
                         return;
                     }else{
-
-                        myApp.imageList.add(new Origin(1,temp.getString("img"), temp.getInt("imgid")));
+                        JSONObject idjson = new JSONObject(temp.getString("imgid"));
+                        myApp.imageList.add(new Origin(1,temp.getString("img"), Integer.parseInt((idjson.getString("img")))));
                     }
                     new Thread() {
                         public void run() {
