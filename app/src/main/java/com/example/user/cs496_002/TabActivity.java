@@ -71,8 +71,8 @@ public class TabActivity extends AppCompatActivity {
                     Manifest.permission.READ_CONTACTS
             }, 0);
         } else {
-            myApp.loadData();
-
+            if(!myApp.fetchfinish)
+                myApp.loadData();
         }
     }
 

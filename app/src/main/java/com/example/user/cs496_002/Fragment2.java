@@ -83,6 +83,28 @@ public class Fragment2 extends Fragment {
 //            e.printStackTrace();
 //        }
 
+        /*NetworkTask getDBimg = new NetworkTask("api/images", "get",null, null);
+        getDBimg.execute();
+
+        try {
+            Log.i("OOM","hi");
+            String result = getDBimg.get();
+            jsonList = new JSONArray(result);
+            for (int i =0; i < jsonList.length(); i++){
+                temp = jsonList.getJSONObject(i);
+                Log.i("OOM","hello");
+                myApp.imageList.add(new Origin(1,temp.getString("img")));
+                Log.i("OOM","bye");
+             }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }*/
+
+
 
         grid = (GridView) resultView.findViewById(R.id.gridView);
         Log.i("OOM",Integer.toString(myApp.imageList.size()));
@@ -92,8 +114,6 @@ public class Fragment2 extends Fragment {
         getImageThread getImage = new getImageThread();
         getImage.start();
         Log.i("OOM", "finish Adapter");
-
-
 
         Button loadImageButton = (Button) resultView.findViewById(R.id.load);
         loadImageButton.setOnClickListener(new View.OnClickListener() {
@@ -123,7 +143,6 @@ public class Fragment2 extends Fragment {
         });
 
         return resultView;
-
     }
 
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
