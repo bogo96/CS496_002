@@ -30,7 +30,6 @@ public class NetworkTask extends AsyncTask<Void, Void, String> {
     private ContentValues values;
     private JSONArray jsonarray;
 
-
     public NetworkTask(String routes, String method, ContentValues values,JSONArray jsonarray) {
 
         this.routes = routes;
@@ -119,8 +118,5 @@ public class NetworkTask extends AsyncTask<Void, Void, String> {
     protected void onPostExecute(String s) {
         super.onPostExecute(s);
 
-        Toast.makeText(getApplicationContext(), s , Toast.LENGTH_SHORT).show();
-
-        //doInBackground()로 부터 리턴된 값이 onPostExecute()의 매개변수로 넘어오므로 s를 출력한다.
     }
 }

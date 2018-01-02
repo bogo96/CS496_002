@@ -15,18 +15,30 @@ import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger;
+import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Arrays;
+import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends AppCompatActivity {
 
     private CallbackManager callbackManager;
-    private AccessToken token = AccessToken.getCurrentAccessToken();
+    //private AccessToken token = AccessToken.getCurrentAccessToken();
+    private AccessToken token;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        MyApplication myApp = (MyApplication) getApplication();
+        token = myApp.token;
 
         final Button goTab = (Button)findViewById(R.id.goTab);
         FacebookSdk.sdkInitialize(getApplicationContext());
@@ -40,13 +52,16 @@ public class MainActivity extends AppCompatActivity {
         }else {
             LoginButton loginButton = (LoginButton) findViewById(R.id.login_button);
             loginButton.setReadPermissions("email");
-
+            LoginManager.getInstance().logInWithReadPermissions(
+                    MainActivity.this,
+                    Arrays.asList("user_friends"));
 
             // Callback registration
             loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
 
                 @Override
                 public void onSuccess(LoginResult loginResult) {
+
                     Intent intent = new Intent(MainActivity.this, TabActivity.class);
                     startActivity(intent);
                     goTab.setVisibility(View.VISIBLE);
