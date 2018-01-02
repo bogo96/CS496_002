@@ -118,13 +118,21 @@ public class GridViewAdapter extends ArrayAdapter {
                 NetworkTask postDBimg = new NetworkTask("api/images","post", null, jsonList);
                 postDBimg.execute();
 
+                String result = "";
+                JSONObject imgid_json = null;
+                int imgid = -1;
                 try {
-                    String result = postDBimg.get();
+                    result = postDBimg.get();
+                    imgid_json = new JSONObject(result);
+                    imgid = imgid_json.getInt("img");
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 } catch (ExecutionException e) {
                     e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
+                data.get(mPosition).imgid = imgid;
 //                Log.i("postDB","after post");
                 return resized;
             }

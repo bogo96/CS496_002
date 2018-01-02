@@ -210,7 +210,7 @@ public class Fragment2 extends Fragment {
 //                        }
 
                         Log.i("uri",uri.toString());
-                        myApp.imageList.add(new Origin(0,uri.toString()));
+                        myApp.imageList.add(new Origin(0,uri.toString(), -1));
                     }
                     gridViewAdapter.notifyDataSetChanged();
 
@@ -271,7 +271,7 @@ public class Fragment2 extends Fragment {
         public void run(){
             while(next) {
                 try {
-                    NetworkTask getDBimg = new NetworkTask("api/images"+myApp.id, "get",null, null);
+                    NetworkTask getDBimg = new NetworkTask("api/images/"+myApp.id, "get",null, null);
                     getDBimg.execute();
                     String result = getDBimg.get();
                     temp = new JSONObject(result);
@@ -280,7 +280,8 @@ public class Fragment2 extends Fragment {
                         next=false;
                         return;
                     }else{
-                        myApp.imageList.add(new Origin(1,temp.getString("img")));
+
+                        myApp.imageList.add(new Origin(1,temp.getString("img"), temp.getInt("imgid")));
                     }
                     new Thread() {
                         public void run() {
