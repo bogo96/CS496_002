@@ -102,32 +102,32 @@ public class GridViewAdapter extends ArrayAdapter {
                 options.inSampleSize = 4;
                 Bitmap resized = Bitmap.createScaledBitmap(bitmap, 100, 100, true);
 //            Log.i("postDB",data.get(mPosition).toString());
-
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.PNG,100,baos);
-                byte[] b = baos.toByteArray();
-                String encodeImg = Base64.encodeToString(b,Base64.DEFAULT);
-                JSONArray jsonList = new JSONArray();
-                try {
-                    JSONObject temp = new JSONObject();
-                    temp.accumulate("img", encodeImg);
-                    Log.i("postDB","before post");
-                    jsonList.put(temp);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-                NetworkTask post2db = new NetworkTask("api/images","post", null, jsonList);
-                post2db.execute();
-
-                try {
-                    String result = post2db.get();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                }
-                Log.i("postDB","after post");
+//
+//                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//                bitmap.compress(Bitmap.CompressFormat.PNG,100,baos);
+//                byte[] b = baos.toByteArray();
+//                String encodeImg = Base64.encodeToString(b,Base64.DEFAULT);
+//                JSONArray jsonList = new JSONArray();
+//                try {
+//                    JSONObject temp = new JSONObject();
+//                    temp.accumulate("img", encodeImg);
+//                    Log.i("postDB","before post");
+//                    jsonList.put(temp);
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                }
+//
+//                NetworkTask post2db = new NetworkTask("api/images","post", null, jsonList);
+//                post2db.execute();
+//
+//                try {
+//                    String result = post2db.get();
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                } catch (ExecutionException e) {
+//                    e.printStackTrace();
+//                }
+//                Log.i("postDB","after post");
                 return resized;
             }
         }
