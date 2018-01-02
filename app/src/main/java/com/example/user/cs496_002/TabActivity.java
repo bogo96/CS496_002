@@ -72,23 +72,7 @@ public class TabActivity extends AppCompatActivity {
             }, 0);
         } else {
             myApp.loadData();
-            JSONArray usr = new JSONArray();
-            try {
-                JSONObject user = new JSONObject("{id:"+myApp.id+"}");
-                usr.put(user);
-            } catch (JSONException e1) {
-                e1.printStackTrace();
-            }
-            NetworkTask postuser = new NetworkTask("api/newuser","post", null, usr);
-            postuser.execute();
 
-            try {
-                String result = postuser.get();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
         }
     }
 

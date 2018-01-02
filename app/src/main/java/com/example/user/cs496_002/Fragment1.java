@@ -55,54 +55,11 @@ public class Fragment1 extends Fragment {
             }
         });
 
-
-        for (int i = 0; i < ContactList.size(); i++) {
+        for(int i=0; i<ContactList.size(); i++){
             Contact c = ContactList.get(i);
-            //adapter.addItem(c.name, c.number, c.email, c.link);
-            try {
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.accumulate("id", myApp.id);
-                jsonObject.accumulate("name", c.name);
-                jsonObject.accumulate("number", c.number);
-                jsonObject.accumulate("email", c.email);
-                jsonObject.accumulate("link", c.link);
-                jsonarray.put(jsonObject);
-            } catch (Exception e) {
-
-            }
-        }
-        // AsyncTask를 통해 HttpURLConnection 수행.
-        NetworkTask networkTask = new NetworkTask("api/addnewcontacts","post", null, jsonarray);
-        networkTask.execute();
-
-        try {
-            String result = networkTask.get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
+            adapter.addItem(c.name, c.number, c.email, c.link);
         }
 
-        /*NetworkTask getAllContact = new NetworkTask("api/getallcontacts", "get",null, null);
-        getAllContact.execute();
-        try {
-            String friendslist = getAllContact.get();
-            JSONArray jsonlist = new JSONArray(friendslist);
-            for(int i=0; i<jsonlist.length(); i++){
-                JSONObject object = (JSONObject)jsonlist.get(i);
-                String name = object.getString("name");
-                String number = object.getString("number");
-                String email = object.getString("email");
-                String link = object.getString("link");
-                adapter.addItem(name, number, email, link);
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }*/
 
         return view;
     }

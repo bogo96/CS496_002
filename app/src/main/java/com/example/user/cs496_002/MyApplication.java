@@ -47,9 +47,65 @@ public class MyApplication extends Application {
 
     public void loadData()
     {
-        if(!fetchfinish){
-            myid();
-            fetchAllContacts();
+        myid();
+
+        JSONArray usr = new JSONArray();
+        try {
+            JSONObject user = new JSONObject("{id:"+id+"}");
+            usr.put(user);
+            NetworkTask postuser = new NetworkTask("api/newuser","post", null, usr);
+            postuser.execute();
+
+            JSONObject result = new JSONObject(postuser.get());
+            Log.i("result", result.toString());
+            if(result.has("error")) return;
+            int success = result.getInt("result");
+            if(success==1){
+                fetchAllContacts();
+                JSONArray jsonarray = new JSONArray();
+                for (int i = 0; i < ContactList.size(); i++) {
+                    Contact c = ContactList.get(i);
+                    //adapter.addItem(c.name, c.number, c.email, c.link);
+                    try {
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.accumulate("id", id);
+                        jsonObject.accumulate("name", c.name);
+                        jsonObject.accumulate("number", c.number);
+                        jsonObject.accumulate("email", c.email);
+                        jsonObject.accumulate("link", c.link);
+                        jsonarray.put(jsonObject);
+                    } catch (Exception e) {
+
+                    }
+                }
+                // AsyncTask를 통해 HttpURLConnection 수행.
+                NetworkTask addnewcontacts = new NetworkTask("api/addnewcontacts","post", null, jsonarray);
+                addnewcontacts.execute();
+
+                String s = addnewcontacts.get();
+            }
+            else{
+                NetworkTask getcontacts = new NetworkTask("api/getallcontacts", "get", null, null);
+                getcontacts.execute();
+
+                JSONArray contactlist = new JSONArray(getcontacts.get());
+                for(int i=0; i<contactlist.length(); i++){
+                    JSONObject json = (JSONObject)contactlist.get(i);
+                    String name = json.getString("name");
+                    String number = json.getString("number");
+                    String email = json.getString("email");
+                    String link = json.getString("link");
+
+                    Contact c = new Contact(name, number, email, link);
+                    ContactList.add(c);
+                }
+            }
+        } catch (JSONException e1) {
+            e1.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
         }
     }
 

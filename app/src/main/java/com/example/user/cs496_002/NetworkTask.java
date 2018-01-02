@@ -108,8 +108,6 @@ public class NetworkTask extends AsyncTask<Void, Void, String> {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
         return buffer.toString();
     }
 
