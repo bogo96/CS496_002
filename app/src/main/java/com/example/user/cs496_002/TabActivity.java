@@ -19,9 +19,10 @@ import java.util.concurrent.ExecutionException;
 
 public class TabActivity extends AppCompatActivity {
 
+    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 496 ;
     private TabLayout tabLayout;
     private ViewPager viewPager;
-
+    private boolean mLocationPermissionGranted = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,18 +75,33 @@ public class TabActivity extends AppCompatActivity {
             if(!myApp.fetchfinish)
                 myApp.loadData();
         }
+
+        if (ContextCompat.checkSelfPermission(this.getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            mLocationPermissionGranted = true;
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+        }
+
+
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[],
                                            int[] grantResults) {
         MyApplication myApp = (MyApplication) getApplication();
+        mLocationPermissionGranted = false;
         switch(requestCode){
             case 0:
                 if(grantResults.length > 0 && grantResults[0]==PackageManager.PERMISSION_GRANTED &&
                         grantResults[1] == PackageManager.PERMISSION_GRANTED){
                     myApp.loadData();
                 }
+            case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION:
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    mLocationPermissionGranted = true;
+                }
+
         }
     }
 }
