@@ -44,7 +44,7 @@ public class Fragment2 extends Fragment {
 
         View resultView = inflater.inflate(R.layout.tab_fragment2, container, false);
         MyApplication myApp = (MyApplication) getActivity().getApplication();
-        NetworkTask getDBimg = new NetworkTask("api/images", "get",null, null);
+        /*NetworkTask getDBimg = new NetworkTask("api/images", "get",null, null);
         getDBimg.execute();
 
         try {
@@ -63,7 +63,7 @@ public class Fragment2 extends Fragment {
             e.printStackTrace();
         } catch (JSONException e) {
             e.printStackTrace();
-        }
+        }*/
 
 
         grid = (GridView) resultView.findViewById(R.id.gridView);
@@ -71,8 +71,6 @@ public class Fragment2 extends Fragment {
         gridViewAdapter = new GridViewAdapter(getActivity(), R.layout.grid_item, myApp.imageList);
         grid.setAdapter(gridViewAdapter);
         Log.i("OOM", "finish Adapter");
-
-
 
         Button loadImageButton = (Button) resultView.findViewById(R.id.load);
         loadImageButton.setOnClickListener(new View.OnClickListener() {
@@ -89,9 +87,7 @@ public class Fragment2 extends Fragment {
                 }
             }
         });
-
-
-
+        
         return resultView;
 
     }

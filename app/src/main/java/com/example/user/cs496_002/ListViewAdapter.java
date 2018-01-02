@@ -1,6 +1,8 @@
 package com.example.user.cs496_002;
 
 import android.content.Context;
+import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,10 +14,11 @@ import java.util.ArrayList;
 public class ListViewAdapter extends BaseAdapter {
     // Adapter에 추가된 데이터를 저장하기 위한 ArrayList
     private ArrayList<ListViewItem> listViewItemList = new ArrayList<ListViewItem>() ;
+    Handler handler;
 
     // ListViewAdapter의 생성자
     public ListViewAdapter() {
-
+            handler = new Handler();
     }
 
     // Adapter에 사용되는 데이터의 개수를 리턴. : 필수 구현
@@ -41,6 +44,7 @@ public class ListViewAdapter extends BaseAdapter {
 
         // Data Set(listViewItemList)에서 position에 위치한 데이터 참조 획득
         ListViewItem listViewItem = listViewItemList.get(position);
+
 
         // 아이템 내 각 위젯에 데이터 반영
         nameTextView.setText(listViewItem.getName());
@@ -70,6 +74,21 @@ public class ListViewAdapter extends BaseAdapter {
         item.setLink(link);
 
         listViewItemList.add(item);
+    }
+
+    public void deleteItem(String name, String number, String email, String link){
+        Log.i("before size",Integer.toString(listViewItemList.size()));
+        for(int i=0; i<listViewItemList.size(); i++){
+            ListViewItem c = listViewItemList.get(i);
+            String cname = c.getName();
+            String cnumber = c.getNumber();
+            String cemail = c.getEmail();
+            String clink = c.getLink();
+            if(cname.compareTo(name)==0 && cnumber.compareTo(cnumber)==0 && cemail.compareTo(cemail)==0 && clink.compareTo(link)==0){
+                listViewItemList.remove(i);
+            }
+        }
+        Log.i("after size",Integer.toString(listViewItemList.size()));
     }
 }
 

@@ -32,7 +32,7 @@ public class Fragment1 extends Fragment {
         View view = inflater.inflate(R.layout.tab_fragment1, container, false);
 
         ListView listview = view.findViewById(R.id.listview);
-        final ListViewAdapter adapter = new ListViewAdapter();
+        //final ListViewAdapter adapter = new ListViewAdapter();
 
         jsonarray = new JSONArray();
 
@@ -40,13 +40,15 @@ public class Fragment1 extends Fragment {
         ContactList = myApp.getContactList();
         token  = myApp.token;
 
-        listview.setAdapter(adapter);
+        listview.setAdapter(myApp.adapter);
 
         listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView parent, View v, int position, long id) {
                 Intent intent = new Intent(getActivity(), Address2.class);
-                ListViewItem item = (ListViewItem) adapter.getItem(position);
+                MyApplication myApp = (MyApplication) getActivity().getApplication();
+                ListViewItem item = (ListViewItem) myApp.adapter.getItem(position);
+                intent.putExtra("position", position);
                 intent.putExtra("name", item.getName());
                 intent.putExtra("number", item.getNumber());
                 intent.putExtra("email", item.getEmail());
@@ -55,10 +57,10 @@ public class Fragment1 extends Fragment {
             }
         });
 
-        for(int i=0; i<ContactList.size(); i++){
+        /*for(int i=0; i<ContactList.size(); i++){
             Contact c = ContactList.get(i);
             adapter.addItem(c.name, c.number, c.email, c.link);
-        }
+        }*/
 
 
         return view;

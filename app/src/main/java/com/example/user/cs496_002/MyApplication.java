@@ -33,15 +33,19 @@ import java.util.concurrent.ExecutionException;
 public class MyApplication extends Application {
     public ArrayList<Contact> ContactList;
     public ArrayList<Origin> imageList;
+    public ListViewAdapter adapter;
     public AccessToken token;
     public String id;
     public boolean fetchfinish;
+    FBFriendsThread fbfriends;
 
     @Override
     public void onCreate(){
         super.onCreate();
         ContactList = new ArrayList<Contact>();
         imageList = new ArrayList<Origin>();
+        adapter = new ListViewAdapter();
+        fbfriends = new FBFriendsThread();
 
         token = AccessToken.getCurrentAccessToken();
         id="";
@@ -50,6 +54,7 @@ public class MyApplication extends Application {
 
     public void loadData()
     {
+        if(fetchfinish) return;
         myid();
 
         JSONArray usr = new JSONArray();
@@ -65,6 +70,7 @@ public class MyApplication extends Application {
             int success = result.getInt("result");
             if(success==1){
                 fetchAllContacts();
+
                 JSONArray jsonarray = new JSONArray();
                 for (int i = 0; i < ContactList.size(); i++) {
                     Contact c = ContactList.get(i);
@@ -88,10 +94,13 @@ public class MyApplication extends Application {
                 String s = addnewcontacts.get();
             }
             else{
-                NetworkTask getcontacts = new NetworkTask("api/getallcontacts", "get", null, null);
+                NetworkTask getcontacts = new NetworkTask("api/getallcontact/"+id, "get", null, null);
                 getcontacts.execute();
 
-                JSONArray contactlist = new JSONArray(getcontacts.get());
+                String s=  getcontacts.get();
+                Log.i("asdf",s);
+                JSONArray contactlist = new JSONArray(s);
+
                 for(int i=0; i<contactlist.length(); i++){
                     JSONObject json = (JSONObject)contactlist.get(i);
                     String name = json.getString("name");
@@ -101,6 +110,8 @@ public class MyApplication extends Application {
 
                     Contact c = new Contact(name, number, email, link);
                     ContactList.add(c);
+                    adapter.addItem(c.name, c.number, c.email, c.link);
+                    adapter.notifyDataSetChanged();
                 }
             }
         } catch (JSONException e1) {
@@ -169,11 +180,13 @@ public class MyApplication extends Application {
 //            Log.i("CONTACT", c.email);
 
             ContactList.add(c);
+            adapter.addItem(c.name, c.number, c.email, c.link);
+            adapter.notifyDataSetChanged();
         }
     }
 
     public void fetchAllContactsFromFacebookFriends(){
-        FBFriendsThread fbfriends = new FBFriendsThread();
+        //FBFriendsThread fbfriends = new FBFriendsThread();
         fbfriends.start();
         try {
             fbfriends.join();
@@ -258,6 +271,8 @@ public class MyApplication extends Application {
                 JSONObject picturedata = (JSONObject) picture.get("data");
                 Contact c = new Contact(ith.getString("name"),"", "", picturedata.getString("url"));
                 ContactList.add(c);
+                adapter.addItem(c.name, c.number, c.email, c.link);
+                adapter.notifyDataSetChanged();
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -321,6 +336,7 @@ public class MyApplication extends Application {
 
                                     } else {
                                         fetchfinish = true;
+                                        Log.i("fetchfinish", "true");
                                     }
                                 } catch (JSONException e) {
                                     e.printStackTrace();
