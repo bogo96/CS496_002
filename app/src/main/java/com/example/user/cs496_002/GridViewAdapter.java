@@ -11,18 +11,29 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
+import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.concurrent.ExecutionException;
 
 public class GridViewAdapter extends ArrayAdapter {
     private int layoutResourceId;
     private Context context;
-    private ArrayList<Uri> data = new ArrayList();
+    private ArrayList<Origin> data = new ArrayList<Origin>();
 
     public GridViewAdapter(Context context, int layoutResourceId, ArrayList data){
         super(context, layoutResourceId, data);
@@ -53,9 +64,9 @@ public class GridViewAdapter extends ArrayAdapter {
         private int mPosition;
         private ViewHolder mHolder;
         private ContentResolver contentResolver;
-        private ArrayList<Uri> data;
+        private ArrayList<Origin> data;
 
-        public ThumbnailTask(int position, ViewHolder holder, ContentResolver contentResolver, ArrayList<Uri> data) {
+        public ThumbnailTask(int position, ViewHolder holder, ContentResolver contentResolver, ArrayList<Origin> data) {
             this.mPosition = position;
             this.mHolder = holder;
             this.contentResolver = contentResolver;
@@ -64,17 +75,61 @@ public class GridViewAdapter extends ArrayAdapter {
 
         @Override
         protected Object doInBackground(Object[] objects) {
-            Bitmap bitmap = null;
-            try {
-                bitmap = MediaStore.Images.Media.getBitmap(contentResolver, data.get(mPosition));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
 
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inSampleSize = 4;
-            Bitmap resized = Bitmap.createScaledBitmap(bitmap, 100, 100, true);
-            return resized;
+            if(data.get(mPosition).from == 1){
+//                String[] temp = data.get(mPosition).content.split(" ");
+//                byte[] decodeString = new byte[temp.length];
+//                for (int i =0; i<decodeString.length; i++){
+//                    decodeString[i] = temp[i];
+//                }
+                Log.i("OOM","IN");
+                byte[] decodeString = Base64.decode(data.get(mPosition).content,Base64.DEFAULT);
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inSampleSize = 4;
+                Bitmap decodeImg = BitmapFactory.decodeByteArray(decodeString,0,decodeString.length);
+                Log.i("OOM",Integer.toString(mPosition));
+                return Bitmap.createScaledBitmap(decodeImg, 100, 100, true);
+
+            }else{
+                Bitmap bitmap = null;
+                try {
+                    bitmap = MediaStore.Images.Media.getBitmap(contentResolver, Uri.parse(data.get(mPosition).content));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                Log.i("postDB", Integer.toString(mPosition));
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inSampleSize = 4;
+                Bitmap resized = Bitmap.createScaledBitmap(bitmap, 100, 100, true);
+//            Log.i("postDB",data.get(mPosition).toString());
+
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.PNG,100,baos);
+                byte[] b = baos.toByteArray();
+                String encodeImg = Base64.encodeToString(b,Base64.DEFAULT);
+                JSONArray jsonList = new JSONArray();
+                try {
+                    JSONObject temp = new JSONObject();
+                    temp.accumulate("img", encodeImg);
+                    Log.i("postDB","before post");
+                    jsonList.put(temp);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                NetworkTask post2db = new NetworkTask("api/images","post", null, jsonList);
+                post2db.execute();
+
+                try {
+                    String result = post2db.get();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                }
+                Log.i("postDB","after post");
+                return resized;
+            }
         }
 
         @Override

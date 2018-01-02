@@ -25,16 +25,14 @@ import android.widget.Toast;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONStringer;
-
-import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
+
+
 
 
 public class Fragment2 extends Fragment {
     int PERMISSION_CODE = 100;
     final int REQ_CODE_SELECT_IMAGE=100;
-    private ArrayList<Uri> imageList;
     private GridViewAdapter gridViewAdapter;
     private GridView grid;
     private JSONArray jsonList;
@@ -44,13 +42,37 @@ public class Fragment2 extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
 
-        imageList = new ArrayList<>();
-        jsonList  = new JSONArray();
         View resultView = inflater.inflate(R.layout.tab_fragment2, container, false);
+        MyApplication myApp = (MyApplication) getActivity().getApplication();
+        NetworkTask getDBimg = new NetworkTask("api/images", "get",null, null);
+        getDBimg.execute();
+
+        try {
+            Log.i("OOM","hi");
+            String result = getDBimg.get();
+            jsonList = new JSONArray(result);
+            for (int i =0; i < jsonList.length(); i++){
+                temp = jsonList.getJSONObject(i);
+                Log.i("OOM","hello");
+                myApp.imageList.add(new Origin(1,temp.getString("img")));
+                Log.i("OOM","bye");
+             }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
 
         grid = (GridView) resultView.findViewById(R.id.gridView);
-        gridViewAdapter = new GridViewAdapter(getActivity(), R.layout.grid_item, imageList);
+        Log.i("OOM",Integer.toString(myApp.imageList.size()));
+        gridViewAdapter = new GridViewAdapter(getActivity(), R.layout.grid_item, myApp.imageList);
         grid.setAdapter(gridViewAdapter);
+        Log.i("OOM", "finish Adapter");
+
+
 
         Button loadImageButton = (Button) resultView.findViewById(R.id.load);
         loadImageButton.setOnClickListener(new View.OnClickListener() {
@@ -67,6 +89,8 @@ public class Fragment2 extends Fragment {
                 }
             }
         });
+
+
 
         return resultView;
 
@@ -91,6 +115,8 @@ public class Fragment2 extends Fragment {
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
+        final MyApplication myApp = (MyApplication) getActivity().getApplication();
+
         if(requestCode == REQ_CODE_SELECT_IMAGE) {
             if(resultCode== Activity.RESULT_OK) {
 
@@ -102,40 +128,21 @@ public class Fragment2 extends Fragment {
                     for(int i=0;i < clipData.getItemCount(); i++){
                         uri = clipData.getItemAt(i).getUri();
                         Log.i("uri",uri.toString());
-
-                        imageList.add(uri);
-                        temp = new JSONObject();
-                        try {
-                            temp.accumulate("uri",uri);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                        jsonList.put(temp);
-
+                        myApp.imageList.add(new Origin(0,uri.toString()));
                     }
                     gridViewAdapter.notifyDataSetChanged();
-
-                    NetworkTask post2network = new NetworkTask("api/images","post", null, jsonList);
-                    post2network.execute();
-
-                    try {
-                        String result = post2network.get();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    } catch (ExecutionException e) {
-                        e.printStackTrace();
-                    }
 
                     grid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                         @Override
                         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                             Intent intent = new Intent(getActivity(), PopupActivity.class);
                             intent.putExtra("position", i);
-                            intent.putExtra("uriList", imageList);
+//                            intent.putExtra("OriginList", imageList);
                             startActivity(intent);
                         }
 
                     });
+
                     grid.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener(){
                         @Override
                         public boolean onItemLongClick(AdapterView<?> adapterView, View view, final int i, long l) {
@@ -144,7 +151,7 @@ public class Fragment2 extends Fragment {
                                     new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialogInterface, int j) {
-                                            imageList.remove(i);
+                                            myApp.imageList.remove(i);
                                             gridViewAdapter.notifyDataSetChanged();
                                         };
                                     }).setNegativeButton("취소", new DialogInterface.OnClickListener() {

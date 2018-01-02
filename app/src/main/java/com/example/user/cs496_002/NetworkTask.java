@@ -75,6 +75,7 @@ public class NetworkTask extends AsyncTask<Void, Void, String> {
                     }
                     writer.flush();
                     writer.close();//버퍼를 받아줌
+                    outStream.close();
                     //return "";
                 } catch (ProtocolException e) {
                     e.printStackTrace();
@@ -107,17 +108,18 @@ public class NetworkTask extends AsyncTask<Void, Void, String> {
             }
             return buffer.toString();//서버로 부터 받은 값을 리턴해줌 아마 OK!!가 들어올것임
         } catch (IOException e) {
-            e.printStackTrace();
+            return null;
+//            e.printStackTrace();
         }
 
 
-        return buffer.toString();
+//        return buffer.toString();
     }
 
     protected void onPostExecute(String s) {
         super.onPostExecute(s);
 
-        Toast.makeText(getApplicationContext(), s , Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), s , Toast.LENGTH_SHORT).show();
 
         //doInBackground()로 부터 리턴된 값이 onPostExecute()의 매개변수로 넘어오므로 s를 출력한다.
     }

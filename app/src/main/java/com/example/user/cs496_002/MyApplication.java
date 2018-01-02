@@ -13,11 +13,13 @@ import java.util.ArrayList;
 
 public class MyApplication extends Application {
     public ArrayList<Contact> ContactList;
+    public ArrayList<Origin> imageList;
 
     @Override
     public void onCreate(){
         super.onCreate();
         ContactList = new ArrayList<Contact>();
+        imageList = new ArrayList<Origin>();
 
     }
 
