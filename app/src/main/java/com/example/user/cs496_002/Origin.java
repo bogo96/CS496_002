@@ -10,9 +10,9 @@ import android.os.Parcelable;
 public class Origin implements Parcelable{
     int from;
     String content;
-    int imgid;
+    String imgid;
 
-    public Origin(int from,String content, int imgid){
+    public Origin(int from,String content, String imgid){
         this.from = from;
         this.content =content;
         this.imgid = imgid;

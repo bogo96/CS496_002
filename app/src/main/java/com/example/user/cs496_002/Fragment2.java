@@ -241,11 +241,11 @@ public class Fragment2 extends Fragment {
 
                         String result = "";
                     JSONObject imgid_json = null;
-                    int imgid = -1;
+                    String imgid = "";
                     try {
                         result = postDBimg.get();
                         imgid_json = new JSONObject(result);
-                        imgid = imgid_json.getInt("result");
+                        imgid = imgid_json.getString("result");
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     } catch (ExecutionException e) {
@@ -299,8 +299,8 @@ public class Fragment2 extends Fragment {
                         next=false;
                         return;
                     }else{
-                        //JSONObject idjson = new JSONObject(temp.getString("id"));
-                        myApp.imageList.add(new Origin(1,temp.getString("img"), Integer.parseInt(temp.getString("id")) ));
+                        JSONObject idjson = new JSONObject(temp.getString("imgid"));
+                        myApp.imageList.add(new Origin(1,temp.getString("img"), idjson.getString("img")));
                     }
                     new Thread() {
                         public void run() {
