@@ -6,6 +6,8 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -36,7 +38,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import static com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_BLUE;
@@ -47,10 +51,17 @@ import static com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_YELL
 public class Fragment3 extends Fragment{
 
     private MapView mapView = null;
+
     private GoogleMap googleMap;
     JSONArray jsonList ;
     JSONArray dbArray;
     JSONObject dbMarker,temp;
+    Geocoder geocoder;
+    Address AddrAddress;
+    List<Address> listAddress;
+
+
+
     private boolean mLocationPermissionGranted;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -59,6 +70,7 @@ public class Fragment3 extends Fragment{
         final MyApplication myApp = (MyApplication)getActivity().getApplication();
         final ToggleButton want = rootView.findViewById(R.id.want);
         final ToggleButton went = rootView.findViewById(R.id.went);
+        final Button search = rootView.findViewById(R.id.button3);
 
         mapView = rootView.findViewById(R.id.map);
         mapView.onCreate(savedInstanceState);
@@ -72,6 +84,7 @@ public class Fragment3 extends Fragment{
         mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(GoogleMap mMap) {
+                Log.i("ready", "ready");
                 googleMap = mMap;
 
                 if (ContextCompat.checkSelfPermission(getActivity().getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -80,6 +93,7 @@ public class Fragment3 extends Fragment{
                     ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 8080);
                 }
                 mMap.setMyLocationEnabled(true);
+
 
                 NetworkTask getDBimg = new NetworkTask("api/maps/"+myApp.id, "get",null, null);
                 getDBimg.execute();
@@ -130,7 +144,6 @@ public class Fragment3 extends Fragment{
                     public boolean onMarkerClick(Marker marker) {
                         MyApplication myApp = (MyApplication) getActivity().getApplication();
                         DeleteMarker(marker);
-
                         return false;
                     }
                 });
@@ -191,9 +204,17 @@ public class Fragment3 extends Fragment{
                     }
                 });
 
+                search.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        searchPlace();
+                    }
+                });
+
                 LatLng sydney = new LatLng(37.56, 126.97);
                 CameraPosition cameraPosition = new CameraPosition.Builder().target(sydney).zoom(12).build();
                 mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
 
 
             }
@@ -216,6 +237,7 @@ public class Fragment3 extends Fragment{
             }
         }
         //call function
+
     }
 
     public void ShowAllMarkers(ArrayList<Marker> markers){
@@ -248,6 +270,44 @@ public class Fragment3 extends Fragment{
                 Log.i("make","IN title onclick");
                 title[0] =  ask.getText().toString();
                 myApp.markerList.get(myApp.markerList.size()-1).setTitle(title[0]);
+//                if (title[0].length()==
+//                    Toast.makeText(getActivity(),"꼭 써주세요",Toast.LENGTH_SHORT);
+//                    title[0] = writeTitle();
+//                }
+            }
+        });
+        popup.show();
+        Log.i("make","OUT title");
+        return title[0];
+    }
+
+    public String searchPlace(){
+        Log.i("make","IN title");
+        final MyApplication myApp = (MyApplication)getActivity().getApplication();
+        AlertDialog.Builder popup = new AlertDialog.Builder(getActivity());
+        final String[] title = new String[1];
+        popup.setTitle("찾을 장소를");
+        popup.setMessage("입력해주세요");
+        final EditText ask = new EditText(getActivity());
+        popup.setView(ask);
+        popup.setPositiveButton("확인", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                Log.i("make","IN title onclick");
+                title[0] =  ask.getText().toString();
+                geocoder = new Geocoder(getActivity());
+                try{
+                    listAddress = geocoder.getFromLocationName(title[0], 5);
+                    if(listAddress.size()>0){
+                        AddrAddress = listAddress.get(0);
+                        LatLng latLng = new LatLng(AddrAddress.getLatitude() , AddrAddress.getLongitude() );
+                        googleMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+
+                    }
+                }catch(IOException e){
+                    e.printStackTrace();
+                }
+                //myApp.markerList.get(myApp.markerList.size()-1).setTitle(title[0]);
 //                if (title[0].length()==
 //                    Toast.makeText(getActivity(),"꼭 써주세요",Toast.LENGTH_SHORT);
 //                    title[0] = writeTitle();
