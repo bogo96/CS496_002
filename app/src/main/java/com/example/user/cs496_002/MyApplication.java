@@ -39,7 +39,7 @@ public class MyApplication extends Application {
     public ArrayList<Marker> markerList;
     public ListViewAdapter adapter;
     public AccessToken token;
-    public String id;
+    public String id, mapstring;
     public boolean fetchfinish;
     FBFriendsThread fbfriends;
 
@@ -118,6 +118,10 @@ public class MyApplication extends Application {
                     adapter.addItem(c.name, c.number, c.email, c.link);
                     adapter.notifyDataSetChanged();
                 }
+
+                NetworkTask getDBimg = new NetworkTask("api/maps/"+id, "get",null, null);
+                getDBimg.execute();
+                mapstring = getDBimg.get();
             }
         } catch (JSONException e1) {
             e1.printStackTrace();

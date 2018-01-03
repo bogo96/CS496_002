@@ -95,11 +95,11 @@ public class Fragment3 extends Fragment{
                 mMap.setMyLocationEnabled(true);
 
 
-                NetworkTask getDBimg = new NetworkTask("api/maps/"+myApp.id, "get",null, null);
-                getDBimg.execute();
-                String result = null;
+//                NetworkTask getDBimg = new NetworkTask("api/maps/"+myApp.id, "get",null, null);
+//                getDBimg.execute();
+               String result = null;
                 try {
-                    result = getDBimg.get();
+                    result = myApp.mapstring;
                     dbArray = new JSONArray(result);
                     for (int i=0; i< dbArray.length(); i++){
                         dbMarker = (JSONObject) dbArray.get(i);
@@ -114,10 +114,6 @@ public class Fragment3 extends Fragment{
                         myApp.markerList.add(marker);
                     }
                     ShowAllMarkers(myApp.markerList);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }

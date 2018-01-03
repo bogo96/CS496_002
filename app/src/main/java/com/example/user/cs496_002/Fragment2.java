@@ -300,8 +300,8 @@ public class Fragment2 extends Fragment {
                         next=false;
                         return;
                     }else{
-                        JSONObject idjson = new JSONObject(temp.getString("imgid"));
-                        myApp.imageList.add(new Origin(1,temp.getString("img"), idjson.getString("img")));
+                        //SONObject idjson = new JSONObject(temp.getString("img"));
+                        myApp.imageList.add(new Origin(1, temp.getString("img"), temp.getString("id")));
                     }
                     new Thread() {
                         public void run() {
