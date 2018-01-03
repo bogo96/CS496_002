@@ -220,7 +220,7 @@ public class Fragment2 extends Fragment {
                         }
 
                         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                        bitmap.compress(Bitmap.CompressFormat.PNG,100,baos);
+                        bitmap.compress(Bitmap.CompressFormat.JPEG,100,baos);
                         byte[] b = baos.toByteArray();
                         String encodeImg = Base64.encodeToString(b,Base64.DEFAULT);
                         JSONArray jsonList = new JSONArray();
@@ -292,6 +292,7 @@ public class Fragment2 extends Fragment {
                     NetworkTask getDBimg = new NetworkTask("api/images/"+myApp.id, "get",null, null);
                     getDBimg.execute();
                     String result = getDBimg.get();
+                    Log.i("image",result);
                     temp = new JSONObject(result);
                     Log.i("OOM","bye");
                     Log.i("temp", temp.toString());

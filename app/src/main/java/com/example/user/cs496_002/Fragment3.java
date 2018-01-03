@@ -294,8 +294,8 @@ public class Fragment3 extends Fragment{
         final MyApplication myApp = (MyApplication) getActivity().getApplication();
         final int[] select = {-1};
         AlertDialog.Builder del_btn = new AlertDialog.Builder(getActivity());
-        del_btn.setTitle("마커를 삭제하시겠습니까?");
-        del_btn.setMessage(delete.getTitle()).setCancelable(false).setPositiveButton("확인",
+        del_btn.setTitle("원하시는 기능을 선택해주세요");
+        del_btn.setMessage(delete.getTitle()).setCancelable(false).setPositiveButton("삭제",
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int j) {
@@ -306,18 +306,30 @@ public class Fragment3 extends Fragment{
                                 select[0]=i;
                                 break;
                             }
-
                         }
-
                         Delete(select[0]);
-
                     }
                 }).setNegativeButton("취소", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int j) {
-            }
-        });
-        del_btn.show();
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int j) {
+                    }
+                }).setNeutralButton("변경", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int j) {
+
+                        if(delete.getTag().equals("60.0")){
+                            delete.setTag("240.0");
+                            delete.setIcon(BitmapDescriptorFactory.defaultMarker(HUE_BLUE));
+                        }else{
+                            delete.setTag("60.0");
+                            delete.setIcon(BitmapDescriptorFactory.defaultMarker(HUE_YELLOW));
+                        }
+                        Update(delete);
+                        ClearAllMarkers(myApp.markerList);
+                        ShowAllMarkers(myApp.markerList);
+                    }
+                });
+                del_btn.show();
     }
 
     @Override
@@ -325,7 +337,32 @@ public class Fragment3 extends Fragment{
         super.onResume();
         mapView.onResume();
     }
-
+    public void Update(Marker marker){
+        MyApplication myApp = (MyApplication)getActivity().getApplication();
+        JSONArray json = new JSONArray();
+        JSONObject info = new JSONObject();
+        try {
+            info = new JSONObject();
+            info.accumulate("latitude", Double.toString(marker.getPosition().latitude));
+            info.accumulate("longitude", Double.toString(marker.getPosition().longitude));
+            info.accumulate("title", marker.getTitle());
+            info.accumulate("Tag", marker.getTag());
+            info.accumulate("id",myApp.id);
+            json.put(info);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        NetworkTask postDBimg = new NetworkTask("api/maps","update", null, json);
+        postDBimg.execute();
+        String result = "";
+        try {
+            result = postDBimg.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+    }
     public void Delete(int i){
         MyApplication  myApp = (MyApplication)getActivity().getApplication();
         JSONArray user = new JSONArray();
