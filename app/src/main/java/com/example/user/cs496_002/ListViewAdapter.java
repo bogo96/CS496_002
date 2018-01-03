@@ -57,7 +57,6 @@ public class ListViewAdapter extends BaseAdapter {
             public void run() {    // 오래 거릴 작업을 구현한다
                 // TODO Auto-generated method stub
                 try{
-                    // 걍 외우는게 좋다 -_-;
                     final ImageView iv = (ImageView)view.findViewById(R.id.imageView);
                     URL url = new URL(listViewItem.getLink());
                     InputStream is = url.openStream();
@@ -102,12 +101,10 @@ public class ListViewAdapter extends BaseAdapter {
     // 아이템 데이터 추가를 위한 함수. 개발자가 원하는대로 작성 가능.
     public void addItem(String name, String number, String email, String link) {
         ListViewItem item = new ListViewItem();
-
         item.setName(name);
         item.setNumber(number);
         item.setEmail(email);
         item.setLink(link);
-
         listViewItemList.add(item);
     }
 

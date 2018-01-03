@@ -299,8 +299,8 @@ public class Fragment2 extends Fragment {
                         next=false;
                         return;
                     }else{
-                        JSONObject idjson = new JSONObject(temp.getString("imgid"));
-                        myApp.imageList.add(new Origin(1,temp.getString("img"), Integer.parseInt((idjson.getString("img")))));
+                        //JSONObject idjson = new JSONObject(temp.getString("id"));
+                        myApp.imageList.add(new Origin(1,temp.getString("img"), Integer.parseInt(temp.getString("id")) ));
                     }
                     new Thread() {
                         public void run() {
@@ -324,7 +324,7 @@ public class Fragment2 extends Fragment {
         final Handler handler = new Handler() {
             public void handleMessage(Message msg) {
                 Log.i("grid","load image");
-                gridViewAdapter.notifyDataSetChanged();  //필자가 원했던 UI 업데이트 작업
+                gridViewAdapter.notifyDataSetChanged();
             }
         };
 

@@ -47,13 +47,18 @@ public class GridViewAdapter extends ArrayAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         ImageView imageView;
 
+        ViewHolder holder;
+
         if(convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.grid_item, parent, false);
+            imageView = (ImageView) convertView.findViewById(R.id.img);
+            holder = new ViewHolder(imageView);
+            convertView.setTag(holder);
+        }
+        else {
+            holder = (ViewHolder) convertView.getTag();
         }
 
-        imageView = (ImageView) convertView.findViewById(R.id.img);
-
-        ViewHolder holder = new ViewHolder(imageView);
         holder.position = position;
         Log.i("???", "???");
         new ThumbnailTask(position, holder, context.getContentResolver(), data,id).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
