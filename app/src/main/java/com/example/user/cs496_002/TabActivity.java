@@ -1,5 +1,8 @@
 package com.example.user.cs496_002;
 
+import android.content.DialogInterface;
+import android.support.v4.app.Fragment;
+import android.support.v4.view.PagerAdapter;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.Manifest;
@@ -17,7 +20,7 @@ import org.json.JSONObject;
 
 import java.util.concurrent.ExecutionException;
 
-public class TabActivity extends AppCompatActivity {
+public class TabActivity extends AppCompatActivity implements DialogInterface.OnDismissListener {
 
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 496 ;
     private TabLayout tabLayout;
@@ -32,7 +35,7 @@ public class TabActivity extends AppCompatActivity {
         tabLayout = findViewById(R.id.tabLayout);
         tabLayout.addTab(tabLayout.newTab().setText("Contacts"));
         tabLayout.addTab(tabLayout.newTab().setText("Gallery"));
-        tabLayout.addTab(tabLayout.newTab().setText("Music"));
+        tabLayout.addTab(tabLayout.newTab().setText("Map"));
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
         // Initializing ViewPager
@@ -102,6 +105,13 @@ public class TabActivity extends AppCompatActivity {
                     mLocationPermissionGranted = true;
                 }
 
+        }
+    }
+
+    public void onDismiss(DialogInterface dialog){
+        Fragment Fragment3 = ((TabPagerAdapter) viewPager.getAdapter()).getItem(2);
+        if(Fragment3 != null){
+            Fragment3.onResume();
         }
     }
 }

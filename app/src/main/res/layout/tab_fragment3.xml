@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-xmlns:tools="http://schemas.android.com/tools"
-android:layout_width="match_parent"
-android:layout_height="match_parent"
-tools:context="com.example.user.cs496_002.Fragment3"
-    android:orientation="horizontal">
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.example.user.cs496_002.Fragment3"
+    >
 
     <com.google.android.gms.maps.MapView
         android:id="@+id/map"
@@ -12,25 +14,29 @@ tools:context="com.example.user.cs496_002.Fragment3"
         android:layout_height="match_parent"
         android:name="com.google.android.gms.maps.MapFragment"/>
 
-    <!--<android.support.v7.widget.CardView-->
-        <!--xmlns:card_view="http://schemas.android.com/apk/res-auto"-->
-        <!--android:name="@+id/card_view"-->
-        <!--android:layout_width="400dp"-->
-        <!--android:layout_height="40dp"-->
-        <!--android:layout_gravity="center"-->
-        <!--card_view:cardCornerRadius="4dp"-->
-        <!--&gt;-->
-        <!--<fragment-->
-            <!--android:id="@+id/place_autocomplete_fragment"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:name="com.google.android.gms.location.places.ui.PlaceAutocompleteFragment"-->
-            <!--&gt;-->
-        <!--</fragment>-->
-
-    <!--</android.support.v7.widget.CardView>-->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_gravity="bottom">
 
 
+        <ToggleButton
+            android:id="@+id/want"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:textOn= "가보고 싶은 곳"
+            android:textOff="가보고 싶은 곳" />
 
+        <ToggleButton
+            android:id="@+id/went"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:textOn= "갔던 곳"
+            android:textOff="갔던 곳"/>
 
-</LinearLayout>
+    </LinearLayout>
+
+</FrameLayout>

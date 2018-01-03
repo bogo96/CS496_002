@@ -3,37 +3,29 @@ package com.example.user.cs496_002;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-
-import android.location.Criteria;
-import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
-
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
+
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
@@ -45,28 +37,30 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
+import static com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_BLUE;
 import static com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_GREEN;
 import static com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_RED;
 import static com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_YELLOW;
 
 public class Fragment3 extends Fragment{
 
-//    final MyApplication myApp = (MyApplication) getActivity().getApplication();
     private MapView mapView = null;
     private GoogleMap googleMap;
-    private Marker currentMarker;
-//    String locationProvider;
-//    LocationManager locationManager;
-//    private LatLng DEFAULT_LOCATION;
+    JSONArray jsonList ;
+    JSONArray dbArray;
+    JSONObject dbMarker,temp;
     private boolean mLocationPermissionGranted;
-    
+
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.tab_fragment3, container, false);
+        final View rootView = inflater.inflate(R.layout.tab_fragment3, container, false);
 
+        final MyApplication myApp = (MyApplication)getActivity().getApplication();
+        final ToggleButton want = rootView.findViewById(R.id.want);
+        final ToggleButton went = rootView.findViewById(R.id.went);
 
-
-        mapView = (MapView) rootView.findViewById(R.id.map);
+        mapView = rootView.findViewById(R.id.map);
         mapView.onCreate(savedInstanceState);
         mapView.onResume(); // needed to get the map to display immediately
         try {
@@ -74,6 +68,7 @@ public class Fragment3 extends Fragment{
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(GoogleMap mMap) {
@@ -86,54 +81,128 @@ public class Fragment3 extends Fragment{
                 }
                 mMap.setMyLocationEnabled(true);
 
-//                locationManager=(LocationManager)getSystemService(Context.LOCATION_SERVICE);
-//                locationProvider = locationManager.getBestProvider(new Criteria(), true);
-//                Location location = locationManager.getLastKnownLocation(locationProvider);
+                NetworkTask getDBimg = new NetworkTask("api/maps/"+myApp.id, "get",null, null);
+                getDBimg.execute();
+                String result = null;
+                try {
+                    result = getDBimg.get();
+                    dbArray = new JSONArray(result);
+                    for (int i=0; i< dbArray.length(); i++){
+                        dbMarker = (JSONObject) dbArray.get(i);
+                        MarkerOptions dboptioins = new MarkerOptions();
+                        LatLng latLng = new LatLng(Double.parseDouble(dbMarker.getString("latitude")),Double.parseDouble(dbMarker.getString("longitude")));
+                        dboptioins.position(latLng);
+                        dboptioins.title(dbMarker.getString("title"));
+                        Log.i("get",dbMarker.getString("title"));
+                        Marker marker = googleMap.addMarker(dboptioins);
+                        marker.setTag(dbMarker.getString("Tag"));
+                        marker.setIcon(BitmapDescriptorFactory.defaultMarker(Float.parseFloat(dbMarker.getString("Tag"))));
+                        myApp.markerList.add(marker);
+                    }
+                    ShowAllMarkers(myApp.markerList);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
 
-                // For dropping a marker at a point on the Map
+
+                googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener(){
+
+                    public void onMapClick(LatLng latLng){
+                        MarkerOptions markeroptions = new MarkerOptions();
+                        float color = ChooseMarkerType();
+                        markeroptions.title(writeTitle());
+                        MyApplication myApp = (MyApplication) getActivity().getApplication();
+                        Log.i("make","before choose");
+                        markeroptions.position(latLng);
+                        Log.i("make","finish title");
+                        Marker marker = googleMap.addMarker(markeroptions);
+                        myApp.markerList.add(marker);
+                        googleMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));   // 마커생성위치로 이동
+                    }
+                });
+
+                googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                    @Override
+                    public boolean onMarkerClick(Marker marker) {
+                        MyApplication myApp = (MyApplication) getActivity().getApplication();
+                        DeleteMarker(marker);
+
+                        return false;
+                    }
+                });
+
+                want.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton compoundButton, boolean check) {
+                        Log.i("want","IN");
+
+                        MyApplication myApp = (MyApplication)getActivity().getApplication();
+                        ClearAllMarkers(myApp.markerList);
+                        if(check){
+                            Log.i("want","check");
+                            for(int i=0; i< myApp.markerList.size(); i++){
+                                if (myApp.markerList.get(i).getTag().equals("60.0")){
+                                    Log.i("want","check - if");
+                                    myApp.markerList.get(i).setVisible(true);
+                                }
+                            }
+                        }
+                        if(went.isChecked()){
+                            Log.i("want","else");
+                            for(int i=0; i< myApp.markerList.size(); i++){
+                                if (myApp.markerList.get(i).getTag().equals("240.0")){
+                                    Log.i("want","else - if");
+                                    myApp.markerList.get(i).setVisible(true);
+                                }
+                            }
+                        }
+                    }
+                });
+
+                went.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton compoundButton, boolean check) {
+                        Log.i("want","IN");
+
+                        MyApplication myApp = (MyApplication)getActivity().getApplication();
+                        ClearAllMarkers(myApp.markerList);
+                        if(check){
+                            Log.i("want","check");
+                            for(int i=0; i< myApp.markerList.size(); i++){
+                                if (myApp.markerList.get(i).getTag().equals("240.0")){
+                                    Log.i("want","check - if");
+                                    myApp.markerList.get(i).setVisible(true);
+                                }
+                            }
+                        }
+                        if(want.isChecked()){
+                            Log.i("want","else");
+                            for(int i=0; i< myApp.markerList.size(); i++){
+                                if (myApp.markerList.get(i).getTag().equals("60.0")){
+                                    Log.i("want","else - if");
+                                    myApp.markerList.get(i).setVisible(true);
+                                }
+                            }
+                        }
+                    }
+                });
+
                 LatLng sydney = new LatLng(37.56, 126.97);
                 CameraPosition cameraPosition = new CameraPosition.Builder().target(sydney).zoom(12).build();
                 mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
+
             }
         });
-
-        googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener(){
-            public void onMapClick(LatLng latLng){
-                MyApplication myApp = (MyApplication) getActivity().getApplication();
-                float color = ChooseMarkerType();
-                Marker marker = googleMap.addMarker(new MarkerOptions());
-                marker.setPosition(latLng);
-                marker.setTitle(writeTitle());
-                marker.setTag(String.valueOf(color));
-                marker.setIcon(BitmapDescriptorFactory.defaultMarker(color));
-                myApp.markerList.add(marker);
-                googleMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));   // 마커생성위치로 이동
-                ShowAllMarkers(myApp.markerList); //마커 생성
-
-                //post2DB
-            }
-        });
-
-        googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-            @Override
-            public boolean onMarkerClick(Marker marker) {
-                MyApplication myApp = (MyApplication) getActivity().getApplication();
-                int select = DeleteMarker(marker);
-                //deletemarker
-                if(select>0){
-                    myApp.markerList.remove(select);
-                    ShowAllMarkers(myApp.markerList); //마커 생성
-                }
-                return false;
-            }
-        });
-
-
-
 
 
         return rootView;
     }
+
 
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
         mLocationPermissionGranted = false;
@@ -150,12 +219,23 @@ public class Fragment3 extends Fragment{
     }
 
     public void ShowAllMarkers(ArrayList<Marker> markers){
+
         for (int i=0; i<markers.size(); i++){
             markers.get(i).showInfoWindow();
 //            googleMap.showinfowindo(markers.get(i));
         }
     }
+
+    public void ClearAllMarkers(ArrayList<Marker> markers){
+
+        for (int i=0; i<markers.size(); i++){
+            markers.get(i).setVisible(false);
+//            googleMap.showinfowindo(markers.get(i));
+        }
+    }
     public String writeTitle(){
+        Log.i("make","IN title");
+        final MyApplication myApp = (MyApplication)getActivity().getApplication();
         AlertDialog.Builder popup = new AlertDialog.Builder(getActivity());
         final String[] title = new String[1];
         popup.setTitle("장소에 대해서");
@@ -165,56 +245,72 @@ public class Fragment3 extends Fragment{
         popup.setPositiveButton("확인", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                try {
-                    title[0] =  ask.getText().toString();
-                } catch (NumberFormatException e) {
-                    Toast.makeText(getActivity(), "입력해주세요.", Toast.LENGTH_SHORT).show();
-                }
+                Log.i("make","IN title onclick");
+                title[0] =  ask.getText().toString();
+                myApp.markerList.get(myApp.markerList.size()-1).setTitle(title[0]);
+//                if (title[0].length()==
+//                    Toast.makeText(getActivity(),"꼭 써주세요",Toast.LENGTH_SHORT);
+//                    title[0] = writeTitle();
+//                }
             }
         });
         popup.show();
+        Log.i("make","OUT title");
         return title[0];
     }
 
     public float ChooseMarkerType(){
-        final String items[] = { "갔던곳 ", "가고 싶은 곳"};
+        Log.i("make","IN choose");
         final float[] color = {HUE_RED};
-        AlertDialog.Builder ab = new AlertDialog.Builder(getActivity());
-        ab.setTitle("선택하세요");
-        ab.setSingleChoiceItems(items, 0, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                switch (whichButton){
-                    case 1:
-                        color[0] = HUE_GREEN;
-                    case 2:
-                        color[0] = HUE_YELLOW;
-                }
-
-            }
-        }).setPositiveButton("확인",
+        final MyApplication myApp = (MyApplication)getActivity().getApplication();
+        AlertDialog.Builder del_btn = new AlertDialog.Builder(getActivity());
+        del_btn.setMessage("선택하세요").setCancelable(false).setPositiveButton("갔던 곳",
                 new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        // OK 버튼 클릭시 , 여기서 선택한 값을 메인 Activity 로 넘기면 된다.
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int j) {
+                        color[0] = HUE_BLUE;
+                        myApp.markerList.get(myApp.markerList.size()-1).setIcon(BitmapDescriptorFactory.defaultMarker(color[0]));
+                        myApp.markerList.get(myApp.markerList.size()-1).setTag(Float.toString(color[0]));
+                        Post();
+                        dialogInterface.dismiss();
                     }
-                });
-        ab.show();
+                }).setNegativeButton("가고 싶은 곳", new DialogInterface.OnClickListener() {
+            @Override
+                public void onClick(DialogInterface dialogInterface, int j) {
+                    color[0] = HUE_YELLOW;
+                    myApp.markerList.get(myApp.markerList.size()-1).setIcon(BitmapDescriptorFactory.defaultMarker(color[0]));
+                    myApp.markerList.get(myApp.markerList.size()-1).setTag(Float.toString(color[0]));
+                    ShowAllMarkers(myApp.markerList);
+                    Post();
+                    dialogInterface.dismiss();
+                }
+            });
+        del_btn.show();
+        Log.i("make","OUT choose");
         return color[0];
     }
 
-    public int DeleteMarker(final Marker delete){
+    public void DeleteMarker(final Marker delete){
         final MyApplication myApp = (MyApplication) getActivity().getApplication();
         final int[] select = {-1};
         AlertDialog.Builder del_btn = new AlertDialog.Builder(getActivity());
-        del_btn.setMessage("마커를 삭제하시겠습니까?").setCancelable(false).setPositiveButton("확인",
+        del_btn.setTitle("마커를 삭제하시겠습니까?");
+        del_btn.setMessage(delete.getTitle()).setCancelable(false).setPositiveButton("확인",
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int j) {
                         for (int i=0; i< myApp.markerList.size(); i++){
-                            if ( myApp.markerList.get(i).getTitle().equals(delete.getTitle()) && myApp.markerList.get(i).getPosition() == delete.getPosition() ){
+                            if ( myApp.markerList.get(i).getPosition().longitude == delete.getPosition().longitude &&
+                                    myApp.markerList.get(i).getPosition().latitude == delete.getPosition().latitude){
+                                Log.i("delete","hi");
                                 select[0]=i;
                                 break;
                             }
+
                         }
+
+                        Delete(select[0]);
+
                     }
                 }).setNegativeButton("취소", new DialogInterface.OnClickListener() {
             @Override
@@ -222,19 +318,7 @@ public class Fragment3 extends Fragment{
             }
         });
         del_btn.show();
-        return select[0];
     }
-
-//    public void SeeInfo(){
-//        googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-//            @Override
-//            public boolean onMarkerClick(Marker marker) {
-//                // 마커 클릭시 호출되는 콜백 메서드
-//                Toast.makeText(getActivity().getApplicationContext(), marker.getTitle(), Toast.LENGTH_SHORT).show();
-//                return false;
-//            }
-//        });
-//    }
 
     @Override
     public void onResume() {
@@ -242,6 +326,56 @@ public class Fragment3 extends Fragment{
         mapView.onResume();
     }
 
+    public void Delete(int i){
+        MyApplication  myApp = (MyApplication)getActivity().getApplication();
+        JSONArray user = new JSONArray();
+        JSONObject info = new JSONObject();
+        Marker marker = myApp.markerList.get(i);
+        try {
+            info.accumulate("id", myApp.id);
+            info.accumulate("longitude", Double.toString(marker.getPosition().longitude));
+            info.accumulate("latitude", Double.toString(marker.getPosition().latitude));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        user.put(info);
+        NetworkTask deleteDBimg = new NetworkTask("api/maps", "delete", null, user);
+        deleteDBimg.execute();
+        Log.i("delete",Integer.toString(myApp.markerList.size()));
+        myApp.markerList.get(i).remove();
+        myApp.markerList.remove(i);
+        Log.i("delete",Integer.toString(myApp.markerList.size()));
+        ShowAllMarkers(myApp.markerList);
+    }
+
+    public void Post(){
+        MyApplication myApp = (MyApplication) getActivity().getApplication();
+        Log.i("onResume","onResume");
+        Log.i("make","start post");
+        jsonList= new JSONArray();
+        Marker marker = myApp.markerList.get(myApp.markerList.size()-1);
+        try {
+            temp = new JSONObject();
+            temp.accumulate("latitude", Double.toString(marker.getPosition().latitude));
+            temp.accumulate("longitude", Double.toString(marker.getPosition().longitude));
+            temp.accumulate("title", marker.getTitle());
+            temp.accumulate("Tag", marker.getTag());
+            temp.accumulate("id",myApp.id);
+            jsonList.put(temp);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        NetworkTask postDBimg = new NetworkTask("api/maps","post", null, jsonList);
+        postDBimg.execute();
+        String result = "";
+        try {
+            result = postDBimg.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+    }
     @Override
     public void onPause() {
         super.onPause();
@@ -260,33 +394,5 @@ public class Fragment3 extends Fragment{
         mapView.onLowMemory();
     }
 
-//    public void setCurrentLocation(Location location, String markerTitle, String markerSnippet) {
-//        if ( currentMarker != null ) currentMarker.remove();
-//
-//        if ( location != null) {
-//            //현재위치의 위도 경도 가져옴
-//            LatLng currentLocation = new LatLng( location.getLatitude(), location.getLongitude());
-//
-//            MarkerOptions markerOptions = new MarkerOptions();
-//            markerOptions.position(currentLocation);
-//            markerOptions.title(markerTitle);
-//            markerOptions.snippet(markerSnippet);
-//            markerOptions.draggable(true);
-//            //markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
-//            currentMarker = this.googleMap.addMarker(markerOptions);
-//
-//            this.googleMap.moveCamera(CameraUpdateFactory.newLatLng(currentLocation));
-//            return;
-//        }
-//
-//        MarkerOptions markerOptions = new MarkerOptions();
-//        markerOptions.position(DEFAULT_LOCATION);
-//        markerOptions.title(markerTitle);
-//        markerOptions.snippet(markerSnippet);
-//        markerOptions.draggable(true);
-//        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-//        currentMarker = this.googleMap.addMarker(markerOptions);
-//
-//        this.googleMap.moveCamera(CameraUpdateFactory.newLatLng(DEFAULT_LOCATION));
-//    }
+
 }
