@@ -15,6 +15,9 @@ import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -33,6 +36,7 @@ import java.util.concurrent.ExecutionException;
 public class MyApplication extends Application {
     public ArrayList<Contact> ContactList;
     public ArrayList<Origin> imageList;
+    public ArrayList<Marker> markerList;
     public ListViewAdapter adapter;
     public AccessToken token;
     public String id;
@@ -44,6 +48,7 @@ public class MyApplication extends Application {
         super.onCreate();
         ContactList = new ArrayList<Contact>();
         imageList = new ArrayList<Origin>();
+        markerList = new ArrayList<Marker>();
         adapter = new ListViewAdapter();
         fbfriends = new FBFriendsThread();
 

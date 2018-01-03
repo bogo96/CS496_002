@@ -324,7 +324,7 @@ public class Fragment2 extends Fragment {
         final Handler handler = new Handler() {
             public void handleMessage(Message msg) {
                 Log.i("grid","load image");
-                gridViewAdapter.notifyDataSetChanged();  //필자가 원했던 UI 업데이트 작업
+                gridViewAdapter.notifyDataSetChanged();
             }
         };
 
