@@ -64,8 +64,6 @@ public class Fragment3 extends Fragment{
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.tab_fragment3, container, false);
 
-
-
         mapView = (MapView) rootView.findViewById(R.id.map);
         mapView.onCreate(savedInstanceState);
         mapView.onResume(); // needed to get the map to display immediately
@@ -77,6 +75,7 @@ public class Fragment3 extends Fragment{
         mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(GoogleMap mMap) {
+                Log.i("ready", "ready");
                 googleMap = mMap;
 
                 if (ContextCompat.checkSelfPermission(getActivity().getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -85,6 +84,36 @@ public class Fragment3 extends Fragment{
                     ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 8080);
                 }
                 mMap.setMyLocationEnabled(true);
+
+                googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener(){
+                    public void onMapClick(LatLng latLng){
+                        MyApplication myApp = (MyApplication) getActivity().getApplication();
+                        float color = ChooseMarkerType();
+                        Marker marker = googleMap.addMarker(new MarkerOptions());
+                        marker.setPosition(latLng);
+                        marker.setTitle(writeTitle());
+                        marker.setTag(String.valueOf(color));
+                        marker.setIcon(BitmapDescriptorFactory.defaultMarker(color));
+                        myApp.markerList.add(marker);
+                        googleMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));   // 마커생성위치로 이동
+                        ShowAllMarkers(myApp.markerList); //마커 생성
+                        //post2DB
+                    }
+                });
+
+                googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                    @Override
+                    public boolean onMarkerClick(Marker marker) {
+                        MyApplication myApp = (MyApplication) getActivity().getApplication();
+                        int select = DeleteMarker(marker);
+                        //deletemarker
+                        if(select>0){
+                            myApp.markerList.remove(select);
+                            ShowAllMarkers(myApp.markerList); //마커 생성
+                        }
+                        return false;
+                    }
+                });
 
 //                locationManager=(LocationManager)getSystemService(Context.LOCATION_SERVICE);
 //                locationProvider = locationManager.getBestProvider(new Criteria(), true);
@@ -97,36 +126,9 @@ public class Fragment3 extends Fragment{
             }
         });
 
-        googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener(){
-            public void onMapClick(LatLng latLng){
-                MyApplication myApp = (MyApplication) getActivity().getApplication();
-                float color = ChooseMarkerType();
-                Marker marker = googleMap.addMarker(new MarkerOptions());
-                marker.setPosition(latLng);
-                marker.setTitle(writeTitle());
-                marker.setTag(String.valueOf(color));
-                marker.setIcon(BitmapDescriptorFactory.defaultMarker(color));
-                myApp.markerList.add(marker);
-                googleMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));   // 마커생성위치로 이동
-                ShowAllMarkers(myApp.markerList); //마커 생성
 
-                //post2DB
-            }
-        });
 
-        googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-            @Override
-            public boolean onMarkerClick(Marker marker) {
-                MyApplication myApp = (MyApplication) getActivity().getApplication();
-                int select = DeleteMarker(marker);
-                //deletemarker
-                if(select>0){
-                    myApp.markerList.remove(select);
-                    ShowAllMarkers(myApp.markerList); //마커 생성
-                }
-                return false;
-            }
-        });
+
 
 
 
@@ -147,6 +149,7 @@ public class Fragment3 extends Fragment{
             }
         }
         //call function
+
     }
 
     public void ShowAllMarkers(ArrayList<Marker> markers){
